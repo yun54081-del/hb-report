@@ -29,6 +29,14 @@ jobs:
           npm install --no-save playwright@1.48
           npx playwright install --with-deps chromium
           pip install pypdf
+      - name: 測試內政部
+        if: ${{ github.event.inputs.only == 'moi' }}
+        run: |
+          curl -sS -m 60 -o /tmp/a.zip -w '%{http_code} %{size_download}\n' 'https://plvr.land.moi.gov.tw/Download?type=zip&fileName=lvr_landcsv.zip' || true
+          curl -sS -m 90 -o /tmp/b.zip -w '%{http_code} %{size_download}\n' 'https://plvr.land.moi.gov.tw/DownloadSeason?season=115S3&type=zip&fileName=lvr_landcsv.zip' || true
+          unzip -l /tmp/a.zip | grep -i '^.*d_lvr_land_a' ; unzip -p /tmp/a.zip d_lvr_land_a.csv | head -5 ; unzip -p /tmp/a.zip d_lvr_land_a.csv | grep -c 東橋 ; unzip -p /tmp/a.zip d_lvr_land_a.csv | grep 東橋 | head -3
+          unzip -p /tmp/b.zip d_lvr_land_a.csv | grep -c 東橋 || true
+          exit 1
       - name: 抓取 5168 實價登錄
         env:
           ONLY: ${{ github.event.inputs.only }}
