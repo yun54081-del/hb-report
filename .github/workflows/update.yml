@@ -13,9 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with:
+          node-version: 20
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with:
+          python-version: '3.12'
       - name: 安裝工具與中文字型
         run: |
           sudo apt-get update -q && sudo apt-get install -y -q fonts-noto-cjk fonts-noto-cjk-extra
@@ -25,7 +27,8 @@ jobs:
       - name: 抓取 5168 實價登錄
         run: node tool/scrape.js "$(python3 tool/update.py period)"
       - name: 產生報表與網頁
-        env: { NODE_PATH: ${{ github.workspace }}/node_modules }
+        env:
+          NODE_PATH: ${{ github.workspace }}/node_modules
         run: |
           python3 tool/update.py build
           cat tool/report.md >> "$GITHUB_STEP_SUMMARY"
