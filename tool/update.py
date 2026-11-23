@@ -128,6 +128,7 @@ def parse(c, r):
         age = round(((ty * 12 + tm) - (by * 12 + bm)) / 12, 1)
         if age < 0: age = 0.0
     if not area or not total: return None
+    if typ == '透天': return None
     addr = raw.replace('台南市', '台南市', 1)
     return dict(ym=ym, typ=typ, addr=addr, total=total, area=area, land=land, floor=flo, rooms=lay,
                 age=age, car=car, note=(r['備註'] or '').strip(), presale=False, raw=raw, id=r['編號'])
@@ -146,14 +147,18 @@ def main_build():
     comms, report, problems = [], [], []
     for c in cfg['communities']:
         recs = [x for x in (parse(c, r) for r in allrows) if x]
-        if not recs and c['key'] in oldc:
-            comms.append(oldc[c['key']]); continue
         # 去重：同址同月同價只留一筆；預售版若已有門牌版（同月同價）則略過
         seen, uniq = set(), []
         for x in recs:
             k = (x['addr'], x['ym'], x['total'])
             if k in seen: continue
             seen.add(k); uniq.append(x)
+        # 內政部「本期」只含最近一次公布、當季季檔要季末才有：保留上次已收錄的成交（聯集）
+        for r in oldc.get(c['key'], {}).get('rows', []):
+            k = (r[2], r[0], r[3])
+            if k in seen: continue
+            seen.add(k)
+            uniq.append(dict(ym=r[0], typ=r[1], addr=r[2], total=r[3], area=r[4], land=r[5], floor=r[6], rooms=r[7], age=r[8], car=r[9], note='', presale=False))
         door = {(x['ym'], x['total']) for x in uniq if not x['presale']}
         uniq = [x for x in uniq if not (x['presale'] and (x['ym'], x['total']) in door)]
         n6 = [x for x in uniq if a6 <= x['ym'] <= b6]
