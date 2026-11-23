@@ -8,12 +8,12 @@ const ymOf=r=>{const m=r.ym.match(/(\d+)年(\d+)月/);return m?m[1]+m[2].padStar
 (async()=>{const b=await chromium.launch();
 const ctx=await b.newContext({locale:'zh-TW',userAgent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'});
 const p=await ctx.newPage();const out={};
-for(const c of cfg.communities){const o=out[c.key]={rows:[],error:null,latest:null};
+const only=process.env.ONLY;for(const c of cfg.communities){if(only&&c.key!==only)continue;const o=out[c.key]={rows:[],error:null,latest:null};
  const url='https://community.houseprice.tw/building/'+c.id+'/price/';
  let ok=false;
  for(let t=0;t<3&&!ok;t++){try{await p.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
    await p.waitForSelector('td.addr',{timeout:30000});await p.waitForTimeout(1200);ok=true;}
-   catch(e){o.error=String(e).slice(0,200);await p.waitForTimeout(4000);}}
+   catch(e){o.error=String(e).slice(0,120);try{o.error+=' | '+(await p.title())+' | '+(await p.evaluate(()=>document.body.innerText.replace(/\s+/g,' ').slice(0,300)))+' | '+p.url();}catch(_){}await p.waitForTimeout(4000);}}
  if(!ok){console.log(c.name,'ERROR',o.error);continue;} o.error=null;
  for(let pg=1;pg<=6;pg++){
   if(pg>1){const first=await p.$eval('td.addr',e=>e.innerText).catch(()=> '');

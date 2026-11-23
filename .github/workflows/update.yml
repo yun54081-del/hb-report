@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: '0 4 * * *'   # 台北時間每天中午 12:00
   workflow_dispatch:
+    inputs:
+      only:
+        description: '只測一個社區（key，留空=全部）'
+        required: false
+        default: ''
 permissions:
   contents: write
 concurrency: update
@@ -25,7 +30,11 @@ jobs:
           npx playwright install --with-deps chromium
           pip install pypdf
       - name: 抓取 5168 實價登錄
-        run: node tool/scrape.js "$(python3 tool/update.py period)"
+        env:
+          ONLY: ${{ github.event.inputs.only }}
+        run: |
+          node tool/scrape.js "$(python3 tool/update.py period)"
+          if [ -n "$ONLY" ]; then cat tool/raw.json | head -c 3000; exit 1; fi
       - name: 產生報表與網頁
         env:
           NODE_PATH: ${{ github.workspace }}/node_modules
