@@ -85,6 +85,7 @@ def moi_rows():
                 rows[r['編號']] = r
             ok += 1
         except Exception as e:
+            if u is urls[1]: continue   # 當季季檔要季末才會公布，失敗屬正常
             errs.append('%s：%s' % (u.split('?')[1][:40], str(e)[:80]))
     return list(rows.values()), ok, errs
 
