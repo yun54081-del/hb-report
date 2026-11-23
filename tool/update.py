@@ -143,7 +143,6 @@ def main_build():
         print('內政部資料下載全部失敗：', derrs); sys.exit(1)
     old = json.load(open(os.path.join(HERE, 'data.json'))) if os.path.exists(os.path.join(HERE, 'data.json')) else {'communities': []}
     oldc = {c['key']: c for c in old['communities']}
-    lay = json.load(open(os.path.join(HERE, 'layouts.json')))
     comms, report, problems = [], [], []
     for c in cfg['communities']:
         recs = [x for x in (parse(c, r) for r in allrows) if x]
