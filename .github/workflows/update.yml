@@ -1,7 +1,7 @@
 name: 每日更新實價登錄
 on:
   schedule:
-    - cron: '0 4 * * *'   # 台北時間每天中午 12:00
+    - cron: '7 3 * * *'   # 台北時間 11:07 排程（GitHub 排程常延遲約 1 小時，實際約中午完成）
   workflow_dispatch:
 permissions:
   contents: write
